@@ -67,7 +67,7 @@ def run_with_timeout(func, args=(), timeout=60):
 def process_input(data):
     formatted_data = []
     for idx, item in enumerate(tqdm(data, desc="Processing questions")):
-        question_id = f"question_866_{idx}"
+        question_id = f"question_{idx}"
         question = item.get("question", "")
         query = item.get("query", "")
         results = []
