@@ -1,139 +1,71 @@
-# Short Generation Script
+# Short Answer Generation (short_generation.py)
 
-This script generates short, concise answers using a language model pipeline for the AdaComp SPARK project.
+This module generates concise answers for a list of questions using an instruction-tuned text-generation model. If retrieved documents (`meta`) are provided, they are used as supporting context; otherwise, the model answers from its own knowledge.
 
 ## Features
-
-- Generates brief, concise answers from document context
-- Optimized for short-form question answering
-- Uses Meta-Llama-3-8B-Instruct model
-- Configurable generation parameters
-- Comprehensive error handling and logging
-
-## Requirements
-
-- Python 3.7+
-- PyTorch
-- Transformers library
-- CUDA-compatible GPU (recommended)
+- Uses an instruction-tuned model (e.g., Meta-Llama-3-8B-Instruct)
+- Supports context-aware generation with `meta` documents
+- Returns brief, direct answers only
+- CLI with configurable generation parameters
+- Structured logging and basic error handling
 
 ## Installation
 
 ```bash
-pip install torch transformers
+pip install torch transformers tqdm
 ```
 
 ## Usage
 
-### Basic Usage
-
-```bash
-python short_generation.py --input input.json --output output.json
-```
-
-### Advanced Usage
-
 ```bash
 python short_generation.py \
-    --model_path /path/to/model \
-    --input input.json \
-    --output output.json \
-    --max_tokens 128 \
-    --temperature 0.5 \
-    --top_p 0.9
+  --model-id /path/to/model \
+  --input /path/to/input.json \
+  --output /path/to/output.json \
+  --max-new-tokens 256 \
+  --temperature 0.6 \
+  --top-p 0.9
 ```
 
-### Command Line Arguments
-
-- `--model_path`: Path to the language model (default: Meta-Llama-3-8B-Instruct)
-- `--input`: Path to input JSON file containing questions and metadata (required)
-- `--output`: Path to output JSON file for generated answers (required)
-- `--max_tokens`: Maximum number of tokens to generate (default: 256)
-- `--temperature`: Sampling temperature for generation (default: 0.6)
-- `--top_p`: Top-p sampling parameter (default: 0.9)
+### Arguments
+- `--model-id` (required): Hugging Face model id or local model path
+- `--input` (required): Path to input JSON file
+- `--output` (required): Path to output JSON file
+- `--max-new-tokens` (default: 256): Max tokens to generate
+- `--temperature` (default: 0.6): Sampling temperature
+- `--top-p` (default: 0.9): Nucleus sampling parameter
 
 ## Input Format
 
-The input JSON file should contain an array of objects with the following structure:
+Array of objects. Each object may include `meta` documents used as context.
 
 ```json
 [
   {
     "question": "What is the capital of France?",
     "meta": [
-      {
-        "content": "Paris is the capital and largest city of France..."
-      }
+      { "content": "Paris is the capital and largest city of France." }
     ],
     "ground_truth": ["Paris"]
   }
 ]
 ```
 
-### Fields
-
-- `question`: The question to be answered (required)
-- `meta`: List of document metadata objects with `content` field (required for short generation)
-- `ground_truth`: Expected answer(s) for evaluation (optional)
-
 ## Output Format
 
-The output JSON file contains an array of results:
+Array of objects with concise answers.
 
 ```json
 [
   {
     "question": "What is the capital of France?",
     "ground_truth": ["Paris"],
-    "answer": "Paris",
-    "meta": [...]
+    "answer": "Paris"
   }
 ]
 ```
 
-## Key Differences from Long Generation
-
-- **Prompt Style**: Uses "as briefly as possible" instruction
-- **Answer Length**: Optimized for short, direct answers
-- **Document Requirement**: Always requires document context (meta field)
-- **Token Limit**: Typically uses fewer tokens for generation
-
-## Error Handling
-
-The script includes comprehensive error handling:
-
-- Validates input file existence
-- Creates output directories if needed
-- Handles JSON parsing errors gracefully
-- Continues processing even if individual items fail
-- Logs errors for debugging
-
-## Examples
-
-### Short Answer Generation
-
-```bash
-python short_generation.py \
-    --input questions_with_docs.json \
-    --output short_answers.json \
-    --max_tokens 64
-```
-
-### Factual Question Answering
-
-```bash
-python short_generation.py \
-    --input factual_questions.json \
-    --output factual_answers.json \
-    --temperature 0.3
-```
-
-## Performance Tips
-
-- Use lower `max_tokens` values (64-128) for shorter answers
-- Lower `temperature` (0.3-0.5) for more deterministic, factual answers
-- Ensure documents in `meta` field are relevant and concise
-
-## License
-
-This script is part of the AdaComp SPARK project.
+## Notes
+- If `meta` is provided, it is used to guide generation; otherwise the model relies on its knowledge.
+- The script is optimized for short, direct answers. For detailed responses, use `long_generation.py`.
+- GPU acceleration is recommended for speed.
