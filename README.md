@@ -1,59 +1,318 @@
-# 基线方法说明
+# AdaComp SPARK - Self-Adaptive Retrieval Knowledge System
 
-本项目实现了以下三种基线方法，用于比较和评估不同的检索增强生成（RAG）技术：
+AdaComp SPARK is a comprehensive framework for adaptive retrieval-augmented generation that dynamically adjusts context size based on question complexity and document quality. The system implements a four-stage pipeline: **Predictor** → **Answer** → **Control** → **Evaluation**.
 
-## 1. AdaComp
-
-**AdaComp** 是一种自适应压缩方法，专门用于分布式深度学习系统。该方法通过动态调整压缩率来优化通信效率，特别适用于参数服务器模型中的分布式随机梯度下降（SGD）训练。
-
-**主要特点：**
-- 自适应压缩率调整
-- 优化分布式训练通信效率
-- 适用于大规模深度学习模型训练
-
-**参考链接：** [AdaComp 项目主页](https://anonymous.4open.science/r/AdaComp-8C0C/README.md)
-
-## 2. CRAG (Corrective Retrieval Augmented Generation)
-
-**CRAG** 是一种纠正性检索增强生成方法，旨在通过引入检索评估器来评估检索文档的整体质量，从而提高生成模型的鲁棒性。根据评估结果，系统会触发不同的知识检索操作来增强生成性能。
-
-**主要特点：**
-- 检索质量评估机制
-- 纠正性检索策略
-- 提高生成鲁棒性
-- 动态知识检索操作
-
-**参考链接：** [CRAG GitHub 仓库](https://github.com/HuskyInSalt/CRAG)
-
-## 3. Self-RAG (Self-Reflective Retrieval-Augmented Generation)
-
-**Self-RAG** 是一种通过自我反思来学习检索、生成和批判的框架。该方法使语言模型能够在生成过程中自适应地检索相关文档，并对生成内容进行自我评估，从而提高输出质量和事实性。
-
-**主要特点：**
-- 自我反思机制
-- 自适应文档检索
-- 生成内容自我评估
-- 提高事实性和质量
-- 端到端训练框架
-
-**参考链接：** [Self-RAG 项目主页](https://selfrag.github.io/)
-
-## 目录结构
+## 🏗️ System Architecture
 
 ```
-code/
-├── Adacomp/          # AdaComp 方法实现
-├── CRAG/            # CRAG 方法实现
-├── SELFRAG/         # Self-RAG 方法实现
-└── README.md        # 本说明文件
+SPARK/
+├── predictor/     # Stage 1: Predict optimal context size (K)
+├── answer/        # Stage 2: Generate answers using predicted K
+├── control/       # Stage 3: Evaluate and adjust K values
+├── eval/          # Stage 4: Final evaluation and metrics
+└── data/          # Datasets and training data
 ```
 
-## 使用方法
+## 🚀 Quick Start
 
-每种基线方法的具体使用方法请参考各自目录下的实现代码和文档。这些方法可以用于比较不同RAG技术的性能，帮助选择最适合特定任务的检索增强生成策略。
+### Prerequisites
 
-## 注意事项
+```bash
+# Install required packages
+pip install torch transformers requests tqdm
 
-- 请确保在使用前已正确安装所有依赖项
-- 不同方法可能需要不同的模型和数据集配置
-- 建议在相同的数据集和评估指标下进行比较实验
+# Ensure you have access to:
+# - Language model API (Ollama or similar)
+# - GPU with CUDA support (recommended)
+# - Sufficient disk space for datasets (~10GB)
+```
+
+### Complete Workflow
+
+```bash
+# 1. Predict optimal K values
+cd predictor
+python use_predictor.py --model_id "your-model" --input questions.json --output k_predictions.json
+
+# 2. Generate answers (short or long)
+cd ../answer
+python short_generation.py --input k_predictions.json --output answers.json
+# OR
+python long_generation.py --input k_predictions.json --output answers.json
+
+# 3. Evaluate and control
+cd ../control
+python control.py --meta_file k_predictions.json --answer_file answers.json --output evaluation.json
+python process.py all --evaluation evaluation.json --original k_predictions.json --output-dir processed/
+
+# 4. Final evaluation (run your evaluation scripts in eval/)
+cd ../eval
+# Add your evaluation metrics here
+```
+
+## 📋 Detailed Workflow
+
+### Stage 1: Predictor (`predictor/`)
+
+**Purpose**: Predict the optimal number of documents (K) needed to answer each question.
+
+**Key Features**:
+- Analyzes question complexity and document relevance
+- Outputs K values: 0 (no context), 1-5 (increasing context), or null (unanswerable)
+- Uses language model to make intelligent predictions
+
+**Usage**:
+```bash
+python use_predictor.py \
+    --model_id "Meta-Llama-3-8B-Instruct" \
+    --input questions_with_docs.json \
+    --output k_predictions.json
+```
+
+**Input Format**:
+```json
+[
+  {
+    "question": "What is the capital of France?",
+    "meta": [
+      {"content": "Paris is the capital and largest city of France..."},
+      {"content": "France is a country in Western Europe..."}
+    ],
+    "ground_truth": ["Paris"]
+  }
+]
+```
+
+**Output Format**:
+```json
+[
+  {
+    "question": "What is the capital of France?",
+    "meta": [...],
+    "ground_truth": ["Paris"],
+    "k": "1"
+  }
+]
+```
+
+### Stage 2: Answer Generation (`answer/`)
+
+**Purpose**: Generate answers using the predicted K values and document context.
+
+**Two Generation Modes**:
+
+#### Short Generation (`short_generation.py`)
+- Optimized for concise, direct answers
+- Always requires document context
+- Uses "as briefly as possible" instruction
+
+```bash
+python short_generation.py \
+    --input k_predictions.json \
+    --output short_answers.json \
+    --max_tokens 64 \
+    --temperature 0.3
+```
+
+#### Long Generation (`long_generation.py`)
+- Generates detailed, comprehensive answers
+- Supports both document-based and knowledge-based answering
+- More flexible context handling
+
+```bash
+python long_generation.py \
+    --input k_predictions.json \
+    --output long_answers.json \
+    --max_tokens 512 \
+    --temperature 0.7
+```
+
+**Output Format**:
+```json
+[
+  {
+    "question": "What is the capital of France?",
+    "ground_truth": ["Paris"],
+    "answer": "Paris",
+    "meta": [...]
+  }
+]
+```
+
+### Stage 3: Control (`control/`)
+
+**Purpose**: Evaluate generated answers and dynamically adjust K values based on performance.
+
+#### Evaluation (`control.py`)
+- Assesses answer quality on a 1-10 scale
+- Provides context adjustment recommendations
+- Connects to Ollama API for evaluation
+
+```bash
+python control.py \
+    --meta_file k_predictions.json \
+    --answer_file answers.json \
+    --output evaluation_results.json \
+    --api_url "http://192.168.200.215:21004/v1/chat/completions" \
+    --model_name "Qwen2.5-72B-Instruct-GPTQ-Int4"
+```
+
+#### Processing (`process.py`)
+- Classifies results by evaluation scores
+- Updates K values based on performance feedback
+- Supports both individual steps and batch processing
+
+```bash
+# Run all processing steps
+python process.py all \
+    --evaluation evaluation_results.json \
+    --original k_predictions.json \
+    --output-dir processed_results/
+
+# Or run individual steps
+python process.py classify --input evaluation_results.json --output-high high.json --output-low low.json
+python process.py reflect --input low.json --output updated.json
+python process.py update --original k_predictions.json --k-values updated.json --output final.json
+```
+
+**Evaluation Output**:
+```json
+[
+  {
+    "question": "What is the capital of France?",
+    "meta": [...],
+    "answer": "Paris",
+    "response": "Evaluation Score: 9\nContext Adjustment: 0",
+    "k": "1"
+  }
+]
+```
+
+### Stage 4: Evaluation (`eval/`)
+
+**Purpose**: Final evaluation and metrics calculation.
+
+**Note**: The eval directory is currently empty. Add your evaluation scripts here to:
+- Calculate accuracy metrics
+- Compare different K values
+- Analyze performance across datasets
+- Generate final reports
+
+**Suggested Evaluation Scripts**:
+```bash
+# Example evaluation structure
+eval/
+├── calculate_metrics.py    # Calculate accuracy, F1, etc.
+├── compare_k_values.py     # Compare performance across K values
+├── dataset_analysis.py     # Analyze performance by dataset
+└── generate_report.py      # Generate final evaluation report
+```
+
+## 📊 Data Management (`data/`)
+
+The data directory contains datasets for training and evaluation:
+
+### Supported Datasets
+- **Natural Questions (NQ)**: Real user questions from Google
+- **TriviaQA**: Trivia-style reading comprehension
+- **SQuAD**: Wikipedia-based reading comprehension
+- **HotpotQA**: Multi-hop reasoning questions
+- **Bio Dataset**: Biomedical questions (from CRAG)
+
+### Data Download
+```bash
+# Download all datasets
+cd data
+bash download_datasets.sh  # Create this script based on data/README.md
+
+# Or download individually
+mkdir -p nq && cd nq
+wget https://dl.fbaipublicfiles.com/dpr/data/retriever/biencoder-nq-dev.json.gz
+gzip -d biencoder-nq-dev.json.gz
+```
+
+## ⚙️ Configuration
+
+### Model Configuration
+- **Predictor Model**: Meta-Llama-3-8B-Instruct (default)
+- **Answer Generation**: Meta-Llama-3-8B-Instruct (default)
+- **Evaluation Model**: Qwen2.5-72B-Instruct-GPTQ-Int4 (default)
+
+### API Configuration
+- **Ollama Endpoint**: `http://192.168.200.215:21004/v1/chat/completions`
+- **Temperature**: 0.6-0.8 (adjustable)
+- **Max Tokens**: 256-512 (adjustable)
+
+### K Value Logic
+- `k=0`: No context (knowledge-based answering)
+- `k=1-5`: Increasing context size
+- `k=null`: Question unanswerable
+- Dynamic adjustment based on evaluation scores
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+1. **API Connection Errors**
+   ```bash
+   # Check API endpoint
+   curl http://192.168.200.215:21004/v1/models
+   
+   # Verify model availability
+   curl http://192.168.200.215:21004/v1/chat/completions \
+     -H "Content-Type: application/json" \
+     -d '{"model": "Qwen2.5-72B-Instruct-GPTQ-Int4", "messages": [{"role": "user", "content": "test"}]}'
+   ```
+
+2. **CUDA Out of Memory**
+   ```bash
+   # Reduce batch size or use CPU
+   export CUDA_VISIBLE_DEVICES=""  # Force CPU usage
+   ```
+
+3. **File Not Found Errors**
+   ```bash
+   # Verify file paths and permissions
+   ls -la input_file.json
+   chmod 644 input_file.json
+   ```
+
+### Performance Optimization
+
+- Use GPU acceleration when available
+- Adjust `max_tokens` based on answer length requirements
+- Lower `temperature` for more deterministic results
+- Batch process multiple questions for efficiency
+
+## 📈 Expected Results
+
+### Performance Metrics
+- **Accuracy**: Question-answering accuracy
+- **Efficiency**: Optimal K value prediction
+- **Adaptability**: Dynamic context adjustment
+- **Robustness**: Performance across different question types
+
+### Typical K Value Distribution
+- Simple factual questions: K=1-2
+- Complex reasoning questions: K=3-5
+- Knowledge-based questions: K=0
+- Unanswerable questions: K=null
+
+## 🤝 Contributing
+
+1. Follow the four-stage pipeline structure
+2. Add comprehensive error handling
+3. Include detailed logging
+4. Update documentation for new features
+5. Test with multiple datasets
+
+## 📄 License
+
+This project is part of the AdaComp SPARK system. Please refer to the main project license for usage terms.
+
+## 🔗 References
+
+- [AdaComp Project](https://anonymous.4open.science/r/AdaComp-8C0C/)
+- [CRAG Repository](https://github.com/HuskyInSalt/CRAG)
+- [Self-RAG Project](https://selfrag.github.io/)
+- [DPR Repository](https://github.com/facebookresearch/DPR)
