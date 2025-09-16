@@ -4,7 +4,7 @@ URL Content Processor
 
 This script fetches and cleans web page content for each URL contained in a JSON
 input file and writes the enriched records to a JSONL output file. It is used in
-the AdaComp SPARK pipeline to enrich web search results with cleaned page text.
+the DTopAgent pipeline to enrich web search results with cleaned page text.
 
 Features:
 - Robust HTTP fetching with retries and timeouts
@@ -183,6 +183,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
 
 
 
