@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 """
-Long Generation Script for AdaComp SPARK
+Long Generation Script for DTopAgent
 
 This script generates long-form answers using a language model pipeline.
 It processes questions with optional document context and generates detailed responses.
 
-Author: AdaComp Team
-Date: 2024
 """
 
 import argparse
