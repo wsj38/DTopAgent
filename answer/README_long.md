@@ -1,6 +1,6 @@
 # Long Generation Script
 
-This script generates long-form answers using a language model pipeline for the AdaComp SPARK project.
+This script generates long-form answers using a language model pipeline for the DTopAgent project.
 
 ## Features
 
@@ -121,4 +121,4 @@ python long_generation.py \
 
 ## License
 
-This script is part of the AdaComp SPARK project.
+This script is part of the DTopAgent project.
