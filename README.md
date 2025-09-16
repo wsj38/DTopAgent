@@ -1,14 +1,14 @@
-# AdaComp SPARK - Self-Adaptive Retrieval Knowledge System
+<img width="1508" height="660" alt="image" src="https://github.com/user-attachments/assets/c4da60d3-e164-4ff0-b902-c1af38af5b77" /># DTopAgent: A Multi-agent Framework for Dynamic Top-k Chunk Retrieval in RAG Pipeline
 
-AdaComp SPARK is a comprehensive framework for adaptive retrieval-augmented generation that dynamically adjusts context size based on question complexity and document quality. The system implements a four-stage pipeline: **Predictor** → **Answer** → **Control** → **Evaluation**.
+DTopAgent is a comprehensive framework for adaptive retrieval-augmented generation that dynamically adjusts chunk size based on question complexity and document quality. The system implements a four-stage pipeline: **Predictor** → **Answer** → **Decision** → **Evaluation**.
 
 ## 🏗️ System Architecture
 
 ```
 SPARK/
-├── predictor/     # Stage 1: Predict optimal context size (K)
+├── predictor/     # Stage 1: Predict optimal chunk size (K)
 ├── answer/        # Stage 2: Generate answers using predicted K
-├── control/       # Stage 3: Evaluate and adjust K values
+├── decision/       # Stage 3: Evaluate and adjust K values
 ├── eval/          # Stage 4: Final evaluation and metrics
 └── data/          # Datasets and training data
 ```
@@ -41,8 +41,8 @@ python short_generation.py --input k_predictions.json --output answers.json
 python long_generation.py --input k_predictions.json --output answers.json
 
 # 3. Evaluate and control
-cd ../control
-python control.py --meta_file k_predictions.json --answer_file answers.json --output evaluation.json
+cd ../decision
+python decision.py --meta_file k_predictions.json --answer_file answers.json --output evaluation.json
 python process.py all --evaluation evaluation.json --original k_predictions.json --output-dir processed/
 
 # 4. Final evaluation (run your evaluation scripts in eval/)
@@ -139,17 +139,17 @@ python long_generation.py \
 ]
 ```
 
-### Stage 3: Control (`control/`)
+### Stage 3: Decision (`decision/`)
 
 **Purpose**: Evaluate generated answers and dynamically adjust K values based on performance.
 
-#### Evaluation (`control.py`)
+#### Evaluation (`decision.py`)
 - Assesses answer quality on a 1-10 scale
 - Provides context adjustment recommendations
 - Connects to Ollama API for evaluation
 
 ```bash
-python control.py \
+python decision.py \
     --meta_file k_predictions.json \
     --answer_file answers.json \
     --output evaluation_results.json \
@@ -308,7 +308,7 @@ gzip -d biencoder-nq-dev.json.gz
 
 ## 📄 License
 
-This project is part of the AdaComp SPARK system. Please refer to the main project license for usage terms.
+This project is part of the DTopAgent system. Please refer to the main project license for usage terms.
 
 ## 🔗 References
 
