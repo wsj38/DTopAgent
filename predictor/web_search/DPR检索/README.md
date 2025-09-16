@@ -360,7 +360,7 @@ python search.py \
 
 ## 🔗 Integration with SPARK
 
-This DPR retrieval system integrates with the AdaComp SPARK pipeline:
+This DPR retrieval system integrates with the DTopAgent pipeline:
 
 1. **Predictor Stage**: Uses DPR search results to predict optimal K values
 2. **Answer Stage**: Provides retrieved documents for answer generation
@@ -369,11 +369,11 @@ This DPR retrieval system integrates with the AdaComp SPARK pipeline:
 
 ## 📄 License
 
-This DPR retrieval system is part of the AdaComp SPARK project. Please refer to the main project license for usage terms.
+This DPR retrieval system is part of the DTopAgent project. Please refer to the main project license for usage terms.
 
 ## 🔗 References
 
 - [DPR Paper](https://arxiv.org/abs/2004.04906) - Dense Passage Retrieval
 - [Elasticsearch Documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/)
 - [Transformers Library](https://huggingface.co/docs/transformers/)
-- [AdaComp SPARK Project](https://anonymous.4open.science/r/AdaComp-8C0C/)
+- [AdaComp Project](https://anonymous.4open.science/r/AdaComp-8C0C/)
