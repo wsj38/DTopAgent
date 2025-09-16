@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Control Script for AdaComp SPARK
+Decision Script for DTopAgent
 
 This script evaluates question-answering responses using a language model.
 It performs self-assessment on generated answers and provides context adjustment recommendations.
