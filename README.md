@@ -1,4 +1,4 @@
-<img width="1508" height="660" alt="image" src="https://github.com/user-attachments/assets/c4da60d3-e164-4ff0-b902-c1af38af5b77" /># DTopAgent: A Multi-agent Framework for Dynamic Top-k Chunk Retrieval in RAG Pipeline
+# DTopAgent: A Multi-agent Framework for Dynamic Top-k Chunk Retrieval in RAG Pipeline
 
 DTopAgent is a comprehensive framework for adaptive retrieval-augmented generation that dynamically adjusts chunk size based on question complexity and document quality. The system implements a four-stage pipeline: **Predictor** → **Answer** → **Decision** → **Evaluation**.
 
