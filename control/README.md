@@ -1,17 +1,17 @@
-# Control Module for AdaComp SPARK
+# Decision Module for DTopAgent
 
-This module provides evaluation and processing capabilities for the AdaComp SPARK project. It consists of two main scripts that work together to evaluate question-answering responses and update context parameters.
+This module provides evaluation and processing capabilities for the DTopAgent project. It consists of two main scripts that work together to evaluate question-answering responses and update context parameters.
 
 ## Overview
 
-The control module implements a feedback loop system that:
+The decision module implements a feedback loop system that:
 1. **Evaluates** generated answers using a language model
 2. **Processes** evaluation results to update context parameters (k values)
 3. **Refines** the system based on performance feedback
 
 ## Files
 
-### `control.py`
+### `decision.py`
 The main evaluation script that assesses question-answering responses using a language model API.
 
 **Key Features:**
@@ -34,7 +34,7 @@ The processing script that handles evaluation results and updates system paramet
 The typical workflow follows this sequence:
 
 ```
-1. Run control.py → Generate evaluation results
+1. Run decision.py → Generate evaluation results
 2. Run process.py → Process results and update parameters
 3. Iterate → Use updated parameters for next evaluation cycle
 ```
@@ -54,10 +54,10 @@ pip install requests tqdm
 
 ## Usage
 
-### Step 1: Evaluation with control.py
+### Step 1: Evaluation with decision.py
 
 ```bash
-python control.py --meta_file metadata.json --answer_file answers.json --output results.json
+python decision.py --meta_file metadata.json --answer_file answers.json --output results.json
 ```
 
 **Parameters:**
@@ -89,7 +89,7 @@ python process.py update --original original.json --k-values updated.json --outp
 
 ## Input/Output Formats
 
-### Input Format (control.py)
+### Input Format (decision.py)
 ```json
 [
   {
@@ -127,13 +127,13 @@ The processing script generates multiple files:
 ## Configuration
 
 ### API Configuration
-The control script connects to an Ollama API endpoint. Default configuration:
+The decision script connects to an Ollama API endpoint. Default configuration:
 - URL: `http://192.168.200.215:端口/v1/chat/completions`
 - Model: `Qwen2.5-72B-Instruct-GPTQ-Int4`
 - Temperature: `0.8`
 
 ### K Value Logic
-The system uses k values to control context size:
+The system uses k values to decision context size:
 - `k=0`: No context (knowledge-based answering)
 - `k=1-5`: Increasing context size
 - Dynamic adjustment based on evaluation scores
@@ -151,7 +151,7 @@ Both scripts include comprehensive error handling:
 ### Complete Evaluation Cycle
 ```bash
 # 1. Evaluate responses
-python control.py \
+python decision.py \
     --meta_file questions_with_context.json \
     --answer_file generated_answers.json \
     --output evaluation_results.json
@@ -165,7 +165,7 @@ python process.py all \
 
 ### Custom API Configuration
 ```bash
-python control.py \
+python decision.py \
     --meta_file data.json \
     --answer_file answers.json \
     --api_url http://your-api-endpoint:port/v1/chat/completions \
@@ -175,7 +175,7 @@ python control.py \
 
 ## Integration
 
-The control module is designed to integrate seamlessly with the broader AdaComp SPARK system:
+The decision module is designed to integrate seamlessly with the broader AdaComp SPARK system:
 
 1. **Input**: Receives questions and generated answers from the answer generation module
 2. **Processing**: Evaluates and processes results using language model APIs
