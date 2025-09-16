@@ -2,7 +2,7 @@
 """
 Process Script for DTopAgent
 
-This script processes evaluation results from the control.py script.
+This script processes evaluation results from the decision.py script.
 It performs three main operations:
 1. Score Classification: Separates high-scoring (9-10) from low-scoring items
 2. Reflection: Updates k values based on evaluation scores and context adjustments
