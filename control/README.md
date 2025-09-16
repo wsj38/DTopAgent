@@ -128,7 +128,7 @@ The processing script generates multiple files:
 
 ### API Configuration
 The decision script connects to an Ollama API endpoint. Default configuration:
-- URL: `http://192.168.200.215:端口/v1/chat/completions`
+- URL: `http://192.168.200.###:端口/v1/chat/completions`
 - Model: `Qwen2.5-72B-Instruct-GPTQ-Int4`
 - Temperature: `0.8`
 
@@ -205,4 +205,4 @@ Add verbose logging by modifying the scripts to include more detailed output for
 
 ## License
 
-This module is part of the AdaComp SPARK project.
+This module is part of the DTopAgent project.
