@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Process Script for AdaComp SPARK
+Process Script for DTopAgent
 
 This script processes evaluation results from the control.py script.
 It performs three main operations:
@@ -8,8 +8,6 @@ It performs three main operations:
 2. Reflection: Updates k values based on evaluation scores and context adjustments
 3. K-value Update: Updates k values in the original dataset
 
-Author: AdaComp Team
-Date: 2024
 """
 
 import argparse
